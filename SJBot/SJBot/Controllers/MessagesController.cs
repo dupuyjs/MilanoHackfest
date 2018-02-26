@@ -2,6 +2,8 @@
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Adapters;
 using Microsoft.Bot.Schema;
+using Microsoft.Recognizers.Text;
+using Microsoft.Recognizers.Text.Number;
 using SJBot.Models;
 using System;
 using System.Collections.Generic;
@@ -39,6 +41,34 @@ namespace Microsoft.Bot.Samples
                     context.State.ConversationProperties["customerId"] = message.Text;
                     context.Reply("Enter description:");
                     context.State.ConversationProperties["currentState"] = "description";
+                    break;
+
+                case "description":
+                    context.State.ConversationProperties["description"] = message.Text;
+                    context.Reply("Enter work hours:");
+
+                    context.State.ConversationProperties["currentState"] = "hours";                 
+                    break;
+
+                case "hours":
+                    context.State.ConversationProperties["hours"] = message.Text;
+                   
+                    // Recognize number
+                    NumberModel numberModel = (NumberModel)NumberRecognizer.Instance.GetNumberModel(Culture.English);
+                    var result = numberModel.Parse(context.Request.AsMessageActivity().Text);
+
+                    
+
+                    if (result.Count > 0 && long.TryParse(result[0].Resolution.Values.FirstOrDefault().ToString(), out long n))
+                    {
+                        context.Reply($"You entered: {n}");
+                        context.Reply("Enter attachment:");
+                        context.State.ConversationProperties["currentState"] = "attachment";
+                    }
+                    else
+                    {
+                        context.Reply("Invalid number. Enter an integer.");
+                    }
                     break;
 
                 default:
