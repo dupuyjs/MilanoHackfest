@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder.Adapters;
+using Microsoft.Bot.Builder.Middleware;
+using Microsoft.Bot.Builder.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -29,7 +31,9 @@ namespace Microsoft.Bot.Samples
 
             services.AddSingleton<BotFrameworkAdapter>(_ =>
             {
-                return new BotFrameworkAdapter(Configuration);
+                return new BotFrameworkAdapter(Configuration)
+                    .Use(new ConversationStateManagerMiddleware(new MemoryStorage()))
+                    .Use(new UserStateManagerMiddleware(new MemoryStorage()));  
             });
         }
 
