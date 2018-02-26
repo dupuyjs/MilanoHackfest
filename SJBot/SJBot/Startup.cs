@@ -6,6 +6,7 @@ using Microsoft.Bot.Builder.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Bot.Samples
 {
@@ -33,7 +34,10 @@ namespace Microsoft.Bot.Samples
             {
                 return new BotFrameworkAdapter(Configuration)
                     .Use(new ConversationStateManagerMiddleware(new MemoryStorage()))
-                    .Use(new UserStateManagerMiddleware(new MemoryStorage()));  
+                    .Use(new UserStateManagerMiddleware(new MemoryStorage()))
+                    .Use(new RegExpRecognizerMiddleware()
+                        .AddIntent("showWorkItems", new Regex("show workitems(.*)", RegexOptions.IgnoreCase))
+                        .AddIntent("addWorkItems", new Regex("add workitems(.*)", RegexOptions.IgnoreCase)));
             });
         }
 
