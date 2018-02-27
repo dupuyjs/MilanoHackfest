@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Constants.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
     <PackageReference Include="Microsoft.Bot.Builder" Version="4.0.0-alpha20180221" />
     <PackageReference Include="Microsoft.Bot.Builder.Ai" Version="4.0.0-alpha20180221" />
@@ -14,6 +18,7 @@
     <PackageReference Include="Microsoft.Recognizers.Text" Version="1.0.0.36" />
     <PackageReference Include="Microsoft.Recognizers.Text.Number" Version="1.0.0.36" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.2" />
+    <PackageReference Include="Promptly-Bot" Version="0.0.3" />
   </ItemGroup>
 
 </Project>

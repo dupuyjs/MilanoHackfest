@@ -8,9 +8,10 @@ namespace SJBot.Models
     public class Workitem
     {
         public string  Description { get; set; }
-        public int Hours { get; set; }
-        public int Customerid { get; set; }
+        public int? Hours { get; set; }
+        public int? Customerid { get; set; }
         public string  Owner { get; set; }
+        public string Object { get; set; }
 
         public Workitem()
         { }
