@@ -28,7 +28,8 @@ namespace SJBot.Views
                             }
                 };
 
-                AdaptiveCard
+                //TODO
+                //AdaptiveCard
 
                 attachments.Add(heroCard.ToAttachment());
             }

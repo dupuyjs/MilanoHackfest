@@ -21,6 +21,7 @@ namespace Microsoft.Bot.Samples
         public MessagesController(BotFrameworkAdapter adapter)
         {
             this.adapter = adapter;
+           
         }
 
         public Task OnReceiveActivity(IBotContext context)
@@ -35,6 +36,7 @@ namespace Microsoft.Bot.Samples
 
             return Task.CompletedTask;
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]Activity activity)

@@ -59,7 +59,8 @@ namespace SJBot.Topics
                 var message = context.Request.AsMessageActivity();
 
                 // If the user wants to change the topic of conversation...
-                if (message.Text.ToLowerInvariant() == "add workitem")
+                
+                if (context.TopIntent.Name == "intent.workitem.add")
                 {
                     // Set the active topic and let the active topic handle this turn.
                     this.SetActiveTopic(Constants.ADD_WORKITEM_TOPIC)
@@ -67,7 +68,7 @@ namespace SJBot.Topics
                     return Task.CompletedTask;
                 }
 
-                if (message.Text.ToLowerInvariant() == "show workitems")
+                if (context.TopIntent.Name == "intent.workitem.list")
                 {
                     this.ClearActiveTopic();
 
@@ -75,7 +76,7 @@ namespace SJBot.Topics
                     return Task.CompletedTask;
                 }
 
-                if (message.Text.ToLowerInvariant() == "help")
+                if (context.TopIntent.Name == "intent.help")
                 {
                     this.ClearActiveTopic();
 

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Bot.Samples
 {
     [Route("api/[controller]")]
+    [Obsolete]
     public class _MessagesController : Controller
     {
         BotFrameworkAdapter adapter = null;
