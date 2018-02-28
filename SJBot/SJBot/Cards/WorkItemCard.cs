@@ -9,11 +9,11 @@ namespace SJBot.Cards
 {
     public class WorkItemCard
     {
-        private readonly Workitem _workItem;
+        private readonly Workitem _workitem;
 
         public WorkItemCard(Workitem workitem)
         {
-            this._workItem = workitem;
+            this._workitem = workitem;
         }
 
         public AdaptiveCard GetCard()
@@ -22,21 +22,27 @@ namespace SJBot.Cards
 
             card.Body.Add(new TextBlock()
             {
-                Text = $"#{_workItem?.Customerid} - {_workItem?.Object}",
+                Text = _workitem?.Object,
                 Size = TextSize.Large,
                 Weight = TextWeight.Bolder
             });
 
-            // Owner
+            // Customer
             card.Body.Add(new TextBlock()
             {
-                Text = _workItem?.Owner?.ToString()
+                Text = $"Customer: { _workitem?.Customer}"
             });
 
             // Duration
             card.Body.Add(new TextBlock()
             {
-                Text = _workItem?.Hours?.ToString()
+                Text = $"Date: {_workitem?.Date.Value.ToShortDateString()} - Hours: {_workitem?.Hours}"
+            });
+
+            card.Body.Add(new Image()
+            {
+                Url = "http://localhost:59929/images/workitem.png",
+                Style = ImageStyle.Normal
             });
 
             // Get Desciption
