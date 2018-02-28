@@ -54,34 +54,37 @@ namespace SJBot.Topics
 
         public override Task OnReceiveActivity(IBotContext context)
         {
-            if ((context.Request.Type == ActivityTypes.Message) && (context.Request.AsMessageActivity().Text.Length > 0))
+            if ((context.Request.Type == ActivityTypes.Message) &&
+                (!string.IsNullOrEmpty(context.Request.AsMessageActivity().Text) || context.Request.AsMessageActivity().Attachments != null))
             {
                 var message = context.Request.AsMessageActivity();
 
                 // If the user wants to change the topic of conversation...
-                
-                if (context.TopIntent.Name == "intent.workitem.add")
+                if (context.TopIntent != null)
                 {
-                    // Set the active topic and let the active topic handle this turn.
-                    this.SetActiveTopic(Constants.ADD_WORKITEM_TOPIC)
-                            .OnReceiveActivity(context);
-                    return Task.CompletedTask;
-                }
+                    if (context.TopIntent.Name == "intent.workitem.add")
+                    {
+                        // Set the active topic and let the active topic handle this turn.
+                        this.SetActiveTopic(Constants.ADD_WORKITEM_TOPIC)
+                                .OnReceiveActivity(context);
+                        return Task.CompletedTask;
+                    }
 
-                if (context.TopIntent.Name == "intent.workitem.list")
-                {
-                    this.ClearActiveTopic();
+                    if (context.TopIntent.Name == "intent.workitem.list")
+                    {
+                        this.ClearActiveTopic();
 
-                    WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS]);
-                    return Task.CompletedTask;
-                }
+                        WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS]);
+                        return Task.CompletedTask;
+                    }
 
-                if (context.TopIntent.Name == "intent.help")
-                {
-                    this.ClearActiveTopic();
+                    if (context.TopIntent.Name == "intent.help")
+                    {
+                        this.ClearActiveTopic();
 
-                    this.ShowHelp(context);
-                    return Task.CompletedTask;
+                        this.ShowHelp(context);
+                        return Task.CompletedTask;
+                    }
                 }
 
                 // If there is an active topic, let it handle this turn until it completes.
