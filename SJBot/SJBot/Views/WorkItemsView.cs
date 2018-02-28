@@ -2,30 +2,38 @@
 using Microsoft.Bot.Builder;
 using System.Collections.Generic;
 using Microsoft.Bot.Schema;
+using System.Linq;
 
 namespace SJBot.Views
 {
     public class WorkItemsView
     {
-        public static void ShowWorkItems(IBotContext context, List<Workitem> workitems)
+        public static void ShowWorkItems(IBotContext context, List<Workitem> workitems, bool lastOnly = false)
         {
             if ((workitems == null) || (workitems.Count == 0))
             {
-                context.Reply("You have no alarms.");
+                context.Reply("You have no workitems saved.");
                 return;
             }
 
             List<Attachment> attachments = new List<Attachment>();
+
+            if (lastOnly)
+            {
+                workitems = new List<Workitem>() { workitems.LastOrDefault() };
+            }
+
             foreach (var item in workitems)
             {
                 HeroCard heroCard = new HeroCard()
                 {
-                    Title = $"WorkItem object: {item.Object}",
-                    Subtitle = $"Customer Id {item.Customerid}",
+                    Title = $"Object: {item.Object}",
+                    Subtitle = $"Customer: {item.Customer}",
+                    Text = $"Date: {item.Date.Value.ToShortDateString()} - Hours: {item.Hours}",
                     Images = new List<CardImage>()
-                            {
-                                new CardImage() { Url = $"https://placeholdit.imgix.net/~text?txtsize=35&txt={item.Object}&w=500&h=260" }
-                            }
+                    {
+                        new CardImage() { Url = $"https://placeholdit.imgix.net/~text?txtsize=35&txt={item.Description}&w=500&h=260" }
+                    }
                 };
 
                 //TODO
@@ -33,6 +41,7 @@ namespace SJBot.Views
 
                 attachments.Add(heroCard.ToAttachment());
             }
+
             var activity = MessageFactory.Carousel(attachments);
             context.Reply(activity);
         }

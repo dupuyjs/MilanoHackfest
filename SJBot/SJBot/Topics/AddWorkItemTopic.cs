@@ -6,7 +6,9 @@ using PromptlyBot.Validator;
 using SJBot.Models;
 using System.Threading.Tasks;
 using System.Linq;
-
+using System;
+using Microsoft.Recognizers.Text.DateTime;
+using System.Globalization;
 
 namespace SJBot.Topics
 {
@@ -20,28 +22,22 @@ namespace SJBot.Topics
         public AddWorkItemTopic() : base()
         {
 
-            this.SubTopics.Add(Constants.CUSTOMERID_PROMPT, () =>
+            this.SubTopics.Add(Constants.CUSTOMER_PROMPT, () =>
             {
-                var customeridPrompt = new Prompt<int>();
+                var customerPrompt = new Prompt<string>();
 
-                customeridPrompt.Set
+                customerPrompt.Set
                     .OnPrompt((context, lastTurnReason) =>
                     {
-                        if ((lastTurnReason != null) && (lastTurnReason == Constants.INT_ERROR))
-                        {
-                            context.Reply("Sorry, customer id must be a number.")
-                            .Reply("Let's try again.");
-                        }
-
-                        context.Reply("Enter the customer id.");
+                        context.Reply("Enter the customer:");
                     })
-                    .Validator(new CustomerIdValidator())
+                    .Validator(new CustomerValidator())
                     .MaxTurns(2)
                     .OnSuccess((context, value) =>
                     {
                         this.ClearActiveTopic();
 
-                        this.State.Workitem.Customerid = value;
+                        this.State.Workitem.Customer = value;
 
                         this.OnReceiveActivity(context);
                     })
@@ -57,7 +53,79 @@ namespace SJBot.Topics
                         this.OnFailure(context, reason);
                     });
 
-                return customeridPrompt;
+                return customerPrompt;
+            });
+
+            this.SubTopics.Add(Constants.OBJECT_PROMPT, () =>
+            {
+                var objectPrompt = new Prompt<string>();
+
+                objectPrompt.Set
+                    .OnPrompt((context, lastTurnReason) =>
+                    {
+                        context.Reply("Enter workitem's object:");
+                    })
+                    .Validator(new ObjectValidator())
+                    .MaxTurns(2)
+                    .OnSuccess((context, value) =>
+                    {
+                        this.ClearActiveTopic();
+
+                        this.State.Workitem.Object = value;
+
+                        this.OnReceiveActivity(context);
+                    })
+                    .OnFailure((context, reason) =>
+                    {
+                        this.ClearActiveTopic();
+
+                        if ((reason != null) && (reason == "toomanyattempts"))
+                        {
+                            context.Reply("I'm sorry I'm having issues understanding you.");
+                        }
+
+                        this.OnFailure(context, reason);
+                    });
+
+                return objectPrompt;
+            });
+
+            this.SubTopics.Add(Constants.DATE_PROMPT, () =>
+            {
+                var datePrompt = new Prompt<DateTime>();
+
+                datePrompt.Set
+                    .OnPrompt((context, lastTurnReason) =>
+                    {
+                        if ((lastTurnReason != null) && (lastTurnReason == Constants.DATE_ERROR))
+                        {
+                            context.Reply("Sorry, wrong date format. \n\n Try again.");
+                        }
+                        context.Reply("Enter workitem's date (YYYY-MM-DD):");
+                    })
+                    .Validator(new DateValidator())
+                    .MaxTurns(2)
+                    .OnSuccess((context, value) =>
+                    {
+                        this.ClearActiveTopic();
+
+                        this.State.Workitem.Date = value;
+
+                        this.OnReceiveActivity(context);
+                    })
+                    .OnFailure((context, reason) =>
+                    {
+                        this.ClearActiveTopic();
+
+                        if ((reason != null) && (reason == "toomanyattempts"))
+                        {
+                            context.Reply("I'm sorry I'm having issues understanding you.");
+                        }
+
+                        this.OnFailure(context, reason);
+                    });
+
+                return datePrompt;
             });
 
             this.SubTopics.Add(Constants.HOURS_PROMPT, () =>
@@ -67,7 +135,11 @@ namespace SJBot.Topics
                 hoursPrompt.Set
                     .OnPrompt((context, lastTurnReason) =>
                     {
-                        context.Reply("Enter hours worked.");
+                        if ((lastTurnReason != null) && (lastTurnReason == Constants.INT_ERROR))
+                        {
+                            context.Reply("Sorry, hours worked must be typed as a number. \n\n Try again.");
+                        }
+                        context.Reply("Enter hours worked:");
                     })
                     .Validator(new HoursValidator())
                     .MaxTurns(2)
@@ -93,41 +165,7 @@ namespace SJBot.Topics
 
                 return hoursPrompt;
             });
-
-            this.SubTopics.Add(Constants.OBJECT_PROMPT, () =>
-            {
-                var hoursPrompt = new Prompt<string>();
-
-                hoursPrompt.Set
-                    .OnPrompt((context, lastTurnReason) =>
-                    {
-                        context.Reply("Enter workitem's object.");
-                    })
-                    .Validator(new ObjectValidator())
-                    .MaxTurns(2)
-                    .OnSuccess((context, value) =>
-                    {
-                        this.ClearActiveTopic();
-
-                        this.State.Workitem.Object = value;
-
-                        this.OnReceiveActivity(context);
-                    })
-                    .OnFailure((context, reason) =>
-                    {
-                        this.ClearActiveTopic();
-
-                        if ((reason != null) && (reason == "toomanyattempts"))
-                        {
-                            context.Reply("I'm sorry I'm having issues understanding you.");
-                        }
-
-                        this.OnFailure(context, reason);
-                    });
-
-                return hoursPrompt;
-            });
-
+         
             this.SubTopics.Add(Constants.DESCRIPTION_PROMPT, () =>
             {
                 var hoursPrompt = new Prompt<string>();
@@ -135,7 +173,7 @@ namespace SJBot.Topics
                 hoursPrompt.Set
                     .OnPrompt((context, lastTurnReason) =>
                     {
-                        context.Reply("Enter hours worked.");
+                        context.Reply("Provide a description of your activity.");
                     })
                     .Validator(new DescriptionValidator())
                     .MaxTurns(2)
@@ -172,9 +210,23 @@ namespace SJBot.Topics
                 return Task.CompletedTask;
             }
 
-            if (this.State.Workitem.Customerid == null)
+            if (this.State.Workitem.Customer == null)
             {
-                this.SetActiveTopic(Constants.CUSTOMERID_PROMPT);
+                this.SetActiveTopic(Constants.CUSTOMER_PROMPT);
+                this.ActiveTopic.OnReceiveActivity(context);
+                return Task.CompletedTask;
+            }
+
+            if (this.State.Workitem.Object == null)
+            {
+                this.SetActiveTopic(Constants.OBJECT_PROMPT);
+                this.ActiveTopic.OnReceiveActivity(context);
+                return Task.CompletedTask;
+            }
+
+            if (this.State.Workitem.Date == null)
+            {
+                this.SetActiveTopic(Constants.DATE_PROMPT);
                 this.ActiveTopic.OnReceiveActivity(context);
                 return Task.CompletedTask;
             }
@@ -182,6 +234,13 @@ namespace SJBot.Topics
             if (this.State.Workitem.Hours == null)
             {
                 this.SetActiveTopic(Constants.HOURS_PROMPT);
+                this.ActiveTopic.OnReceiveActivity(context);
+                return Task.CompletedTask;
+            }            
+
+            if (this.State.Workitem.Description == null)
+            {
+                this.SetActiveTopic(Constants.DESCRIPTION_PROMPT);
                 this.ActiveTopic.OnReceiveActivity(context);
                 return Task.CompletedTask;
             }
@@ -192,28 +251,50 @@ namespace SJBot.Topics
         }
     }
 
-    public class CustomerIdValidator : Validator<int>
+    public class CustomerValidator : Validator<string>
     {
-        public override ValidatorResult<int> Validate(IBotContext context)
+        public override ValidatorResult<string> Validate(IBotContext context)
         {
-            // Recognize number
-            NumberModel numberModel = (NumberModel)NumberRecognizer.Instance.GetNumberModel(Culture.English);
-            var result = numberModel.Parse(context.Request.AsMessageActivity().Text);
+            return new ValidatorResult<string>
+            {
+                Value = context.Request.AsMessageActivity().Text
+            };
+        }
+    }
 
-            if (result.Count > 0 && int.TryParse(result[0].Resolution.Values.FirstOrDefault().ToString(), out int n))
-            {                 
-                return new ValidatorResult<int>
+    public class DateValidator : Validator<DateTime>
+    {
+        public override ValidatorResult<DateTime> Validate(IBotContext context)
+        {
+            // Recognize Date
+            DateTimeRecognizer dateRecognizer = DateTimeRecognizer.GetInstance(DateTimeOptions.None);
+            DateTimeModel dateModel = dateRecognizer.GetDateTimeModel("en-US");
+            var result = dateModel.Parse(context.Request.AsMessageActivity().Text);
+
+            if (result.Count > 0 && !string.IsNullOrEmpty(result[0].Text))
+            {           
+                try
                 {
-                    Value = n
-                };
+                    return new ValidatorResult<DateTime>
+                    {
+                        Value = DateTime.ParseExact(result[0].Text, "yyyy-MM-dd", CultureInfo.CurrentCulture)
+                    };
+                }
+                catch (Exception e)
+                {
+                    return new ValidatorResult<DateTime>
+                    {
+                        Reason = Constants.DATE_ERROR
+                    };
+                }
             }
             else
             {
-                return new ValidatorResult<int>
+                return new ValidatorResult<DateTime>
                 {
-                    Reason = Constants.INT_ERROR
+                    Reason = Constants.DATE_ERROR
                 };
-            }   
+            }
         }
     }
 
