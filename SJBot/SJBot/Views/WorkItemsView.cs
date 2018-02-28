@@ -27,13 +27,16 @@ namespace SJBot.Views
             {
                 HeroCard heroCard = new HeroCard()
                 {
-                    Title = $"Object: {item.Object}",
-                    Subtitle = $"Customer: {item.Customer}",
-                    Text = $"Date: {item.Date.Value.ToShortDateString()} - Hours: {item.Hours}",
-                    Images = new List<CardImage>()
-                    {
-                        new CardImage() { Url = $"https://placeholdit.imgix.net/~text?txtsize=35&txt={item.Description}&w=500&h=260" }
-                    }
+                    Title = $"Object: {item.Object} - Customer: {item.Customer}",
+                    Subtitle = $"Date: {item.Date.Value.ToShortDateString()} - Hours: {item.Hours}",
+                    Text = $"Description: {item.Description}",
+
+
+                    //Images = new List<CardImage>()
+                    //{
+                    //    new CardImage() { Url = $"https://placeholdit.imgix.net/~text?txtsize=35&txt={item.Description}&w=500&h=260" }
+                    //}
+
                 };
 
                 //TODO

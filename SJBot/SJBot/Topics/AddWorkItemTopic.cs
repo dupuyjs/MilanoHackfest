@@ -9,6 +9,7 @@ using System.Linq;
 using System;
 using Microsoft.Recognizers.Text.DateTime;
 using System.Globalization;
+using Microsoft.Bot.Builder.Ai;
 
 namespace SJBot.Topics
 {
@@ -210,11 +211,25 @@ namespace SJBot.Topics
                 return Task.CompletedTask;
             }
 
-            if (this.State.Workitem.Customer == null)
+            foreach (LuisEntity item in context.TopIntent.Entities)
             {
-                this.SetActiveTopic(Constants.CUSTOMER_PROMPT);
-                this.ActiveTopic.OnReceiveActivity(context);
-                return Task.CompletedTask;
+                // CUSTOMER
+                if (item.Type == "entity.customer")
+                {
+                    this.State.Workitem.Customer = item.Value;
+                }
+
+                //DATE
+                if (item.Type == "builtin.datetimeV2.date")
+                {
+                    this.State.Workitem.Date = item.ValueAs<DateTime>();
+                }
+
+                //// HOURS
+                //if (item.Type == "number")
+                //{
+                //    this.State.Workitem.Customer = item.Value;
+                //}
             }
 
             if (this.State.Workitem.Object == null)
@@ -224,6 +239,13 @@ namespace SJBot.Topics
                 return Task.CompletedTask;
             }
 
+            if (this.State.Workitem.Customer == null)
+            {
+                this.SetActiveTopic(Constants.CUSTOMER_PROMPT);
+                this.ActiveTopic.OnReceiveActivity(context);
+                return Task.CompletedTask;
+            }
+            
             if (this.State.Workitem.Date == null)
             {
                 this.SetActiveTopic(Constants.DATE_PROMPT);
