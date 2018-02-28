@@ -14,7 +14,7 @@ namespace SJBot.Models
         public int? Hours { get; set; }      
         public string Description { get; set; }
         public string Owner { get; set; }
-        public List<Attachment> Attachments { get; set; }
+        public Attachment Attachment { get; set; }
 
         public Workitem()
         { }

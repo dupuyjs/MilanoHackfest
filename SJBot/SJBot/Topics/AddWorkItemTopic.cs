@@ -10,6 +10,7 @@ using System;
 using Microsoft.Recognizers.Text.DateTime;
 using System.Globalization;
 using Microsoft.Bot.Builder.Ai;
+using Microsoft.Bot.Schema;
 
 namespace SJBot.Topics
 {
@@ -201,43 +202,43 @@ namespace SJBot.Topics
                 return hoursPrompt;
             });
 
-            ////this.SubTopics.Add(Constants.ATTACHMENT_PROMPT, () =>
-            //{
-            //    var hoursPrompt = new Prompt<byte[]>();
+            this.SubTopics.Add(Constants.ATTACHMENT_PROMPT, () =>
+            {
+                var attachmentPrompt = new Prompt<Attachment>();
 
-            //    hoursPrompt.Set
-            //        .OnPrompt((context, lastTurnReason) =>
-            //        {
-            //            if ((lastTurnReason != null) && (lastTurnReason == Constants.INT_ERROR))
-            //            {
-            //                context.Reply("Sorry, hours worked must be typed as a number. \n\n Try again.");
-            //            }
-            //            context.Reply("Upload a document for activity:");
-            //        })
-            //        .Validator(new AttachmentValidator())
-            //        .MaxTurns(2)
-            //        .OnSuccess((context, value) =>
-            //        {
-            //            this.ClearActiveTopic();
+                attachmentPrompt.Set
+                    .OnPrompt((context, lastTurnReason) =>
+                    {
+                        if ((lastTurnReason != null) && (lastTurnReason == Constants.INT_ERROR))
+                        {
+                            context.Reply("Sorry, hours worked must be typed as a number. \n\n Try again.");
+                        }
+                        context.Reply("Upload a document for activity:");
+                    })
+                    .Validator(new AttachmentValidator())
+                    .MaxTurns(2)
+                    .OnSuccess((context, value) =>
+                    {
+                        this.ClearActiveTopic();
 
-            //            this.State.Workitem.Attachments = new System.Collections.Generic.List<byte[]>() { value};
+                        this.State.Workitem.Attachment = value;
 
-            //            this.OnReceiveActivity(context);
-            //        })
-            //        .OnFailure((context, reason) =>
-            //        {
-            //            this.ClearActiveTopic();
+                        this.OnReceiveActivity(context);
+                    })
+                    .OnFailure((context, reason) =>
+                    {
+                        this.ClearActiveTopic();
 
-            //            if ((reason != null) && (reason == "toomanyattempts"))
-            //            {
-            //                context.Reply("I'm sorry I'm having issues understanding you.");
-            //            }
+                        if ((reason != null) && (reason == "toomanyattempts"))
+                        {
+                            context.Reply("I'm sorry I'm having issues understanding you.");
+                        }
 
-            //            this.OnFailure(context, reason);
-            //        });
+                        this.OnFailure(context, reason);
+                    });
 
-            //    return hoursPrompt;
-            //});
+                return attachmentPrompt;
+            });
 
         }
 
@@ -249,25 +250,28 @@ namespace SJBot.Topics
                 return Task.CompletedTask;
             }
 
-            foreach (LuisEntity item in context.TopIntent.Entities)
+            if (context.TopIntent != null)
             {
-                // CUSTOMER
-                if (item.Type == "entity.customer")
+                foreach (LuisEntity item in context.TopIntent.Entities)
                 {
-                    this.State.Workitem.Customer = item.Value;
-                }
+                    // CUSTOMER
+                    if (item.Type == "entity.customer")
+                    {
+                        this.State.Workitem.Customer = item.Value;
+                    }
 
-                //DATE
-                if (item.Type == "builtin.datetimeV2.date")
-                {
-                    this.State.Workitem.Date = item.ValueAs<DateTime>();
-                }
+                    //DATE
+                    if (item.Type == "builtin.datetimeV2.date")
+                    {
+                        this.State.Workitem.Date = item.ValueAs<DateTime>();
+                    }
 
-                //// HOURS
-                //if (item.Type == "number")
-                //{
-                //    this.State.Workitem.Customer = item.Value;
-                //}
+                    //// HOURS
+                    //if (item.Type == "number")
+                    //{
+                    //    this.State.Workitem.Customer = item.Value;
+                    //}
+                }
             }
 
             if (this.State.Workitem.Object == null)
@@ -305,12 +309,12 @@ namespace SJBot.Topics
                 return Task.CompletedTask;
             }
 
-            //if (this.State.Workitem.Attachments == null)
-            //{
-            //    this.SetActiveTopic(Constants.ATTACHMENT_PROMPT);
-            //    this.ActiveTopic.OnReceiveActivity(context);
-            //    return Task.CompletedTask;
-            //}
+            if (this.State.Workitem.Attachment == null)
+            {
+                this.SetActiveTopic(Constants.ATTACHMENT_PROMPT);
+                this.ActiveTopic.OnReceiveActivity(context);
+                return Task.CompletedTask;
+            }
 
             this.OnSuccess(context, this.State.Workitem);
 
@@ -412,23 +416,23 @@ namespace SJBot.Topics
         }
     }
 
-    public class AttachmentValidator : Validator<byte[]>
+    public class AttachmentValidator : Validator<Attachment>
     {
-        public override ValidatorResult<byte[]> Validate(IBotContext context)
+        public override ValidatorResult<Attachment> Validate(IBotContext context)
         {
             if (context.Request.AsMessageActivity().Attachments != null && context.Request.AsMessageActivity().Attachments.Any())
             {
                 var attachment = context.Request.AsMessageActivity().Attachments.FirstOrDefault();
 
-                return new ValidatorResult<byte[]>
+                return new ValidatorResult<Attachment>
                 {
 
-                    Value = (byte[])attachment.Content
+                    Value = attachment
                 };
             }
             else
             {
-                return new ValidatorResult<Byte[]>
+                return new ValidatorResult<Attachment>
                 {
                     Reason = Constants.ATTACHMENT_ERROR
                 };
