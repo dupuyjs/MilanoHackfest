@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Bot.Schema;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace SJBot.Models
         public int? Hours { get; set; }      
         public string Description { get; set; }
         public string Owner { get; set; }
+        public List<Attachment> Attachments { get; set; }
 
         public Workitem()
         { }
