@@ -60,7 +60,7 @@ namespace SJBot.Topics
                 var message = context.Request.AsMessageActivity();
 
                 // If the user wants to change the topic of conversation...
-                if (context.TopIntent != null)
+                if (context.TopIntent != null && context.TopIntent.Score > 0.7)
                 {
                     if (context.TopIntent.Name == "intent.workitem.add")
                     {
