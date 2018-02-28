@@ -37,7 +37,7 @@ namespace SJBot.Topics
 
                         ((List<Workitem>)ctx.State.UserProperties[Constants.USER_STATE_WORKITEMS]).Add(workitem);
 
-                        context.Reply($"Added workitem for customer '{ workitem.Customerid }' set by '{ workitem.Owner }'.");
+                        WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], true);
                     })
                     .OnFailure((ctx, reason) =>
                     {
@@ -117,17 +117,17 @@ namespace SJBot.Topics
                     context.Reply($"Nice to meet you, {name}.");                   
                 }
 
-                context.Reply("Choose an action: 'Add workitem', 'Show workitems', 'Help'.");
-
+                //context.Reply("Choose an action: 'Add workitem', 'Show workitems', 'Help'.");
+                context.Reply("How can I help you? Type 'help' to show actions available.");
             }
         }
 
         private void ShowHelp(IBotContext context)
         {
             var message = "Here's what I can do:\n\n";
-            message += "To see your work items, say 'Show workitems'.\n\n";
-            message += "To add a work item, say 'Add workitem'.\n\n";
-            message += "To see this again, say 'Help'.";
+            message += "To see your work items, you could say 'Show workitems'.\n\n";
+            message += "To add a work item, you could say 'Add workitem'.\n\n";
+            message += "To see this again, you could say 'Help'.";
 
             context.Reply(message);
         }
