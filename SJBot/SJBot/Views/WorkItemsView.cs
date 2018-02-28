@@ -2,6 +2,8 @@
 using Microsoft.Bot.Builder;
 using System.Collections.Generic;
 using Microsoft.Bot.Schema;
+using SJBot.Cards;
+using AdaptiveCards;
 
 namespace SJBot.Views
 {
@@ -18,20 +20,28 @@ namespace SJBot.Views
             List<Attachment> attachments = new List<Attachment>();
             foreach (var item in workitems)
             {
-                HeroCard heroCard = new HeroCard()
+                var card = new WorkItemCard(item);
+
+                Attachment attachment = new Attachment()
                 {
-                    Title = $"WorkItem object: {item.Object}",
-                    Subtitle = $"Customer Id {item.Customerid}",
-                    Images = new List<CardImage>()
-                            {
-                                new CardImage() { Url = $"https://placeholdit.imgix.net/~text?txtsize=35&txt={item.Object}&w=500&h=260" }
-                            }
+                    ContentType = AdaptiveCard.ContentType,
+                    Content = card.GetCard()
                 };
+
+                //HeroCard heroCard = new HeroCard()
+                //{
+                //    Title = $"WorkItem object: {item.Object}",
+                //    Subtitle = $"Customer Id {item.Customerid}",
+                //    Images = new List<CardImage>()
+                //            {
+                //                new CardImage() { Url = $"https://placeholdit.imgix.net/~text?txtsize=35&txt={item.Object}&w=500&h=260" }
+                //            }
+                //};
 
                 //TODO
                 //AdaptiveCard
 
-                attachments.Add(heroCard.ToAttachment());
+                attachments.Add(attachment);
             }
             var activity = MessageFactory.Carousel(attachments);
             context.Reply(activity);
