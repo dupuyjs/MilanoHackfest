@@ -222,7 +222,16 @@ namespace SJBot.Topics
                 //DATE
                 if (item.Type == "builtin.datetimeV2.date")
                 {
-                    this.State.Workitem.Date = item.ValueAs<DateTime>();
+                    try
+                    {
+                        this.State.Workitem.Date = item.ValueAs<DateTime>();
+                    }
+                    catch (Exception)
+                    {
+                        context.Reply("Date provided does not match the requested format");
+                    }
+
+                    
                 }
 
                 //// HOURS
