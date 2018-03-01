@@ -8,6 +8,7 @@ using SJBot.Views;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Bot.Samples;
 using Microsoft.Extensions.Configuration;
+using static SJBot.Middleware.AttachmentMiddleware;
 
 namespace SJBot.Topics
 {
@@ -68,6 +69,11 @@ namespace SJBot.Topics
                 // If the user wants to change the topic of conversation...
                 if (context.TopIntent != null && context.TopIntent.Score > 0.7)
                 {
+                    if(context.TopIntent.Name == "intent.image")
+                    {
+                        context.Reply(((VisionEntity)context.TopIntent.Entities[0]).Value);
+                    }
+
                     if (context.TopIntent.Name == "intent.currentuser")
                     {
                         if (context.State.UserProperties["owner"] != null)

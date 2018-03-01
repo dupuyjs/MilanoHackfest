@@ -27,13 +27,15 @@ namespace SJBot.Middleware
 
                 Vision result = await MakeAnalysisRequest(imageBuffer, "d44d077e88e24f1ab5dbda8c0794455a");
 
-                IList<Entity> entities = new List<Entity>();
-                entities.Add(new Entity() {
-                    GroupName = result.description.captions.FirstOrDefault().text,
-                    Score = result.description.captions.FirstOrDefault().confidence
-                });
+                var entity = new VisionEntity() {
+                    Value = result.description.captions.FirstOrDefault().text,
+                    Type = "Description"
+                };
 
-                context.TopIntent = new Intent { Name = "intent.image", Score = 1.0};
+                var topIntent = new Intent { Name = "intent.image", Score = 1.0 };
+                topIntent.Entities.Add(entity);
+
+                context.TopIntent = topIntent;
             }
 
             await next().ConfigureAwait(false);
@@ -135,6 +137,18 @@ namespace SJBot.Middleware
             }
 
             return visionResult;
+        }
+
+
+        public class VisionEntity : Entity
+        {
+            public VisionEntity()
+            {
+
+            }
+
+            public string Type { get; set; }
+            public string Value { get; set; }
         }
 
         private async Task<bool> UploadToBlob(IBotContext context, byte[] imgBuffer)
