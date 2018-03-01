@@ -63,28 +63,26 @@ namespace SJBot.Topics
                 // If the user wants to change the topic of conversation...
                 if (context.TopIntent != null && context.TopIntent.Score > 0.7)
                 {
-                    
-
-                if (context.TopIntent.Name == "intent.currentuser")
-                {
-                    if (context.State.UserProperties["owner"] != null)
+                    if (context.TopIntent.Name == "intent.currentuser")
                     {
-                        context.Reply($"Current user: {context.State.UserProperties["owner"]}");
+                        if (context.State.UserProperties["owner"] != null)
+                        {
+                            context.Reply($"Current user: {context.State.UserProperties["owner"]}");
+                        }
+                        else
+                        {
+                            context.Reply($"I've not recognized yet. What's your name?");                        
+                        }
+                        return Task.CompletedTask;
                     }
-                    else
-                    {
-                        context.Reply($"I've not recognized yet. What's your name?");                        
-                    }
-                    return Task.CompletedTask;
-                }
 
-                if (context.TopIntent.Name == "intent.workitem.add")
-                {
-                    // Set the active topic and let the active topic handle this turn.
-                    this.SetActiveTopic(Constants.ADD_WORKITEM_TOPIC)
-                            .OnReceiveActivity(context);
-                    return Task.CompletedTask;
-                }
+                    if (context.TopIntent.Name == "intent.workitem.add")
+                    {
+                        // Set the active topic and let the active topic handle this turn.
+                        this.SetActiveTopic(Constants.ADD_WORKITEM_TOPIC)
+                                .OnReceiveActivity(context);
+                        return Task.CompletedTask;
+                    }
 
                     if (context.TopIntent.Name == "intent.workitem.list")
                     {
@@ -101,16 +99,17 @@ namespace SJBot.Topics
                         this.ShowHelp(context);
                         return Task.CompletedTask;
                     }
+
+                    if (context.TopIntent.Name == "intent.restart")
+                    {
+                        this.ClearActiveTopic();
+                        context.State.ConversationProperties.Clear();
+                        context.State.UserProperties.Clear();
+                        //return Task.CompletedTask;
+                    }
                 }
 
-                if (context.TopIntent.Name == "intent.restart")
-                {
-                    this.ClearActiveTopic();
-                    context.State.ConversationProperties.Clear();
-                    context.State.UserProperties.Clear();
-                    //return Task.CompletedTask;
-                }
-
+               
                 // If there is an active topic, let it handle this turn until it completes.
                 if (HasActiveTopic)
                 {
