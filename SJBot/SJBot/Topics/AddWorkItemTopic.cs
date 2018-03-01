@@ -205,7 +205,7 @@ namespace SJBot.Topics
 
             this.SubTopics.Add(Constants.ATTACHMENT_PROMPT, () =>
             {
-                var attachmentPrompt = new Prompt<Attachment>();
+                var attachmentPrompt = new Prompt<string>();
 
                 attachmentPrompt.Set
                     .OnPrompt((context, lastTurnReason) =>
@@ -429,23 +429,22 @@ namespace SJBot.Topics
         }
     }
 
-    public class AttachmentValidator : Validator<Attachment>
+    public class AttachmentValidator : Validator<string>
     {
-        public override ValidatorResult<Attachment> Validate(IBotContext context)
+        public override ValidatorResult<string> Validate(IBotContext context)
         {
             if (context.Request.AsMessageActivity().Attachments != null && context.Request.AsMessageActivity().Attachments.Any())
             {
-                var attachment = context.Request.AsMessageActivity().Attachments.FirstOrDefault();
+                var attachment = context.Request.AsMessageActivity().Attachments.FirstOrDefault().Name;
 
-                return new ValidatorResult<Attachment>
+                return new ValidatorResult<string>
                 {
-
                     Value = attachment
                 };
             }
             else
             {
-                return new ValidatorResult<Attachment>
+                return new ValidatorResult<string>
                 {
                     Reason = Constants.ATTACHMENT_ERROR
                 };

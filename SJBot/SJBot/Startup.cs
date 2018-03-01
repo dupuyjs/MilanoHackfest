@@ -12,7 +12,7 @@ using SJBot.Middleware;
 using System.Text.RegularExpressions;
 
 
-namespace Microsoft.Bot.Samples
+namespace SJBot
 {
     public class Startup
     {

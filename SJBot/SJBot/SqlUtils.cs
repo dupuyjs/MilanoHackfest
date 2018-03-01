@@ -34,7 +34,7 @@ namespace SJBot
                 cmd.Parameters.Add("@hours", SqlDbType.Int, 80).Value = item.Hours;
                 cmd.Parameters.Add("@descr", SqlDbType.VarChar, 80).Value = item.Description;
                 cmd.Parameters.Add("@owner", SqlDbType.VarChar, 80).Value = item.Owner;
-                cmd.Parameters.Add("@attach", SqlDbType.VarChar, 255).Value = "";  //item.Attachment;
+                cmd.Parameters.Add("@attach", SqlDbType.VarChar, 255).Value = item.Attachment;  //item.Attachment;
                 cmd.CommandType = CommandType.Text;
                 cmd.ExecuteNonQuery();
             }

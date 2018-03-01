@@ -1,6 +1,5 @@
 ﻿using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Middleware;
-using Microsoft.Bot.Samples;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
@@ -19,6 +18,7 @@ namespace SJBot.Middleware
     {
         public async Task ReceiveActivity(IBotContext context, MiddlewareSet.NextDelegate next)
         {
+            
             if (HasImageAttachment(context))
             {
                 byte[] imageBuffer = await GetImageFromMessageAsync(context);
