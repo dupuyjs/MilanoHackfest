@@ -8,6 +8,7 @@ using Microsoft.Bot.Builder.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SJBot.Middleware;
 using System.Text.RegularExpressions;
 
 
@@ -38,10 +39,7 @@ namespace Microsoft.Bot.Samples
                 return new BotFrameworkAdapter(Configuration)
                     .Use(new ConversationStateManagerMiddleware(new MemoryStorage()))
                     .Use(new UserStateManagerMiddleware(new MemoryStorage()))
-                    //.Use(new RegExpRecognizerMiddleware()
-                    //    .AddIntent("intent.workitem.list", new Regex("show workitems(.*)", RegexOptions.IgnoreCase))
-                    //    .AddIntent("intent.workitem.add", new Regex("add workitems(.*)", RegexOptions.IgnoreCase))
-                    //    .AddIntent("intent.help", new Regex("help(.*)", RegexOptions.IgnoreCase)))
+                    .Use(new AttachmentMiddleware())
                     .Use(new LuisRecognizerMiddleware("c66fd498-6a8c-4e26-b7d9-5b51b640092a", "68f543767b3a49afae9da0f10491d5fb"));
 
             });

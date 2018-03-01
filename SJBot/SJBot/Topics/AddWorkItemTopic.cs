@@ -11,6 +11,7 @@ using Microsoft.Recognizers.Text.DateTime;
 using System.Globalization;
 using Microsoft.Bot.Builder.Ai;
 using Microsoft.Bot.Schema;
+using Newtonsoft.Json;
 
 namespace SJBot.Topics
 {
@@ -263,7 +264,12 @@ namespace SJBot.Topics
                     //DATE
                     if (item.Type == "builtin.datetimeV2.date")
                     {
-                        this.State.Workitem.Date = item.ValueAs<DateTime>();
+                        FlexObject resolution = item.Resolution;
+
+                        var instance = JsonConvert.SerializeObject(resolution["values"][0]);
+                        TimeEx time = JsonConvert.DeserializeObject<TimeEx>(instance);
+
+                        this.State.Workitem.Date = DateTime.Parse(time.value);
                     }
 
                     //// HOURS
@@ -331,6 +337,13 @@ namespace SJBot.Topics
                 Value = context.Request.AsMessageActivity().Text
             };
         }
+    }
+
+    public class TimeEx
+    {
+        public string timex { get; set; }
+        public string type { get; set; }
+        public string value { get; set; }
     }
 
     public class DateValidator : Validator<DateTime>
