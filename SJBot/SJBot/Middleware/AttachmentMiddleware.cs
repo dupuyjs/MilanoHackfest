@@ -1,5 +1,8 @@
 ﻿using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Middleware;
+using Microsoft.Bot.Samples;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using SJBot.Models;
 using System;
@@ -19,6 +22,8 @@ namespace SJBot.Middleware
             if (HasImageAttachment(context))
             {
                 byte[] imageBuffer = await GetImageFromMessageAsync(context);
+
+                bool isUploaded = await UploadToBlob(context, imageBuffer);
 
                 Vision result = await MakeAnalysisRequest(imageBuffer, "d44d077e88e24f1ab5dbda8c0794455a");
 
@@ -131,5 +136,46 @@ namespace SJBot.Middleware
 
             return visionResult;
         }
+
+        private async Task<bool> UploadToBlob(IBotContext context, byte[] imgBuffer)
+        {
+            var message = context.Request.AsMessageActivity();
+            var attachment = message.Attachments[0];
+            var filename = attachment.Name;
+            var filetype = attachment.ContentType;  
+
+
+            CloudStorageAccount account = CloudStorageAccount.Parse(Startup.BlobConnectionString);
+            CloudBlobClient blobClient = account.CreateCloudBlobClient();
+
+            try
+            {
+                if (blobClient != null)
+                {
+                    CloudBlobContainer container = blobClient.GetContainerReference(Startup.BlobContainerName);
+
+                    await container.CreateIfNotExistsAsync();
+
+                    CloudBlockBlob blockBlob = container.GetBlockBlobReference($"{filename}");
+                    blockBlob.Properties.ContentType = filetype;
+
+                    using (var memoryStream = new System.IO.MemoryStream(imgBuffer))
+                    {
+                        await blockBlob.UploadFromStreamAsync(memoryStream);
+
+                        return true;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Trace.Write(ex, "BlobStorage - Uploadfile");             
+            }
+            return false;
+
+
+        }
+
     }
 }

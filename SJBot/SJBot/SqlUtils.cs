@@ -64,8 +64,8 @@ namespace SJBot
                         item.Object = reader["WorkObject"].ToString();
                         item.Date = DateTime.Parse(reader["WorkDate"].ToString());
                         item.Hours = int.Parse(reader["WorkHours"].ToString());
-                        item.Description = reader["Customer"].ToString();
-                        item.Owner = reader["Customer"].ToString();
+                        item.Description = reader["WorkDescription"].ToString();
+                        item.Owner = reader["WorkOwner"].ToString();
 
                         list.Add(item);
                     }

@@ -17,6 +17,9 @@ namespace Microsoft.Bot.Samples
     public class Startup
     {
         public static string ConnectionString { get; private set; }
+        public static string BlobConnectionString { get; private set; }
+        public static string BlobContainerName { get; private set; }
+
 
         public Startup(IHostingEnvironment env)
         {
@@ -27,6 +30,8 @@ namespace Microsoft.Bot.Samples
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
             ConnectionString = Configuration.GetSection("ConnectionStrings").GetSection("DefaultConnection").Value;
+            BlobConnectionString = Configuration.GetSection("BlobConnection").GetSection("DefaultConnection").Value;
+            BlobContainerName = Configuration.GetSection("BlobConnection").GetSection("ContainerName").Value;
         }
 
         public IConfiguration Configuration { get; }
