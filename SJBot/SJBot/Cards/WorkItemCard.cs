@@ -1,4 +1,5 @@
 ﻿using AdaptiveCards;
+using Microsoft.AspNetCore.Http;
 using SJBot.Models;
 using System;
 using System.Collections.Generic;
@@ -16,11 +17,22 @@ namespace SJBot.Cards
             this._workitem = workitem;
         }
 
-        public AdaptiveCard GetCard()
+        public AdaptiveCard GetCard(IHttpContextAccessor accessor)
         {
             AdaptiveCard card = new AdaptiveCard();
 
-            card.Body.Add(new TextBlock()
+            var columnSet = new ColumnSet();
+            card.Body.Add(columnSet);
+
+            var firstColumn = new Column();
+            columnSet.Columns.Add(firstColumn);
+            firstColumn.Size = "auto";
+
+            var secondColumn = new Column();
+            columnSet.Columns.Add(secondColumn);
+            secondColumn.Size = "stretch";
+
+            firstColumn.Items.Add(new TextBlock()
             {
                 Text = _workitem?.Object,
                 Size = TextSize.Large,
@@ -28,21 +40,22 @@ namespace SJBot.Cards
             });
 
             // Customer
-            card.Body.Add(new TextBlock()
+            firstColumn.Items.Add(new TextBlock()
             {
                 Text = $"Customer: { _workitem?.Customer}"
             });
 
             // Duration
-            card.Body.Add(new TextBlock()
+            firstColumn.Items.Add(new TextBlock()
             {
                 Text = $"Date: {_workitem?.Date.Value.ToShortDateString()} - Hours: {_workitem?.Hours}"
             });
 
-            card.Body.Add(new Image()
+            secondColumn.Items.Add(new Image()
             {
-                Url = "http://localhost:59929/images/workitem.png",
-                Style = ImageStyle.Normal
+                Url = $"http://{accessor.HttpContext.Request.Host}/images/workitem.png",
+                Style = ImageStyle.Normal,
+                HorizontalAlignment = HorizontalAlignment.Right
             });
 
             // Get Desciption

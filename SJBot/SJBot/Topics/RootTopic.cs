@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using SJBot.Models;
 using SJBot.Views;
+using Microsoft.AspNetCore.Http;
 
 namespace SJBot.Topics
 {
     public class RootTopic : TopicsRoot
     {
-
+        public IHttpContextAccessor Accessor { get; set; }
 
         public RootTopic(IBotContext context) : base(context)
         {
@@ -37,7 +38,7 @@ namespace SJBot.Topics
 
                         ((List<Workitem>)ctx.State.UserProperties[Constants.USER_STATE_WORKITEMS]).Add(workitem);
 
-                        WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], true);
+                        WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], Accessor, true);
                     })
                     .OnFailure((ctx, reason) =>
                     {
@@ -74,7 +75,7 @@ namespace SJBot.Topics
                     {
                         this.ClearActiveTopic();
 
-                        WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS]);
+                        WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], Accessor);
                         return Task.CompletedTask;
                     }
 

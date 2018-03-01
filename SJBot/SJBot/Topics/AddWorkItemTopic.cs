@@ -10,6 +10,7 @@ using System;
 using Microsoft.Recognizers.Text.DateTime;
 using System.Globalization;
 using Microsoft.Bot.Builder.Ai;
+using System.Collections.Generic;
 
 namespace SJBot.Topics
 {

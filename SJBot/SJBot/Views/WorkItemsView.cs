@@ -5,12 +5,13 @@ using Microsoft.Bot.Schema;
 using SJBot.Cards;
 using AdaptiveCards;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace SJBot.Views
 {
     public class WorkItemsView
     {
-        public static void ShowWorkItems(IBotContext context, List<Workitem> workitems, bool lastOnly = false)
+        public static void ShowWorkItems(IBotContext context, List<Workitem> workitems, IHttpContextAccessor accessor, bool lastOnly = false)
         {
             if ((workitems == null) || (workitems.Count == 0))
             {
@@ -32,7 +33,7 @@ namespace SJBot.Views
                 Attachment attachment = new Attachment()
                 {
                     ContentType = AdaptiveCard.ContentType,
-                    Content = card.GetCard()
+                    Content = card.GetCard(accessor)
                 };
 
                 attachments.Add(attachment);
