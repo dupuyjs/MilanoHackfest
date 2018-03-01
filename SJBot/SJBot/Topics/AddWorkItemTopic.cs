@@ -10,6 +10,7 @@ using System;
 using Microsoft.Recognizers.Text.DateTime;
 using System.Globalization;
 using Microsoft.Bot.Builder.Ai;
+using Microsoft.Bot.Schema;
 
 namespace SJBot.Topics
 {
@@ -201,6 +202,44 @@ namespace SJBot.Topics
                 return hoursPrompt;
             });
 
+            this.SubTopics.Add(Constants.ATTACHMENT_PROMPT, () =>
+            {
+                var attachmentPrompt = new Prompt<Attachment>();
+
+                attachmentPrompt.Set
+                    .OnPrompt((context, lastTurnReason) =>
+                    {
+                        if ((lastTurnReason != null) && (lastTurnReason == Constants.INT_ERROR))
+                        {
+                            context.Reply("Sorry, hours worked must be typed as a number. \n\n Try again.");
+                        }
+                        context.Reply("Upload a document for activity:");
+                    })
+                    .Validator(new AttachmentValidator())
+                    .MaxTurns(2)
+                    .OnSuccess((context, value) =>
+                    {
+                        this.ClearActiveTopic();
+
+                        this.State.Workitem.Attachment = value;
+
+                        this.OnReceiveActivity(context);
+                    })
+                    .OnFailure((context, reason) =>
+                    {
+                        this.ClearActiveTopic();
+
+                        if ((reason != null) && (reason == "toomanyattempts"))
+                        {
+                            context.Reply("I'm sorry I'm having issues understanding you.");
+                        }
+
+                        this.OnFailure(context, reason);
+                    });
+
+                return attachmentPrompt;
+            });
+
         }
 
         public override Task OnReceiveActivity(IBotContext context)
@@ -211,34 +250,28 @@ namespace SJBot.Topics
                 return Task.CompletedTask;
             }
 
-            foreach (LuisEntity item in context.TopIntent.Entities)
+            if (context.TopIntent != null)
             {
-                // CUSTOMER
-                if (item.Type == "entity.customer")
+                foreach (LuisEntity item in context.TopIntent.Entities)
                 {
-                    this.State.Workitem.Customer = item.Value;
-                }
+                    // CUSTOMER
+                    if (item.Type == "entity.customer")
+                    {
+                        this.State.Workitem.Customer = item.Value;
+                    }
 
-                //DATE
-                if (item.Type == "builtin.datetimeV2.date")
-                {
-                    try
+                    //DATE
+                    if (item.Type == "builtin.datetimeV2.date")
                     {
                         this.State.Workitem.Date = item.ValueAs<DateTime>();
                     }
-                    catch (Exception)
-                    {
-                        context.Reply("Date provided does not match the requested format");
-                    }
 
-                    
+                    //// HOURS
+                    //if (item.Type == "number")
+                    //{
+                    //    this.State.Workitem.Customer = item.Value;
+                    //}
                 }
-
-                //// HOURS
-                //if (item.Type == "number")
-                //{
-                //    this.State.Workitem.Customer = item.Value;
-                //}
             }
 
             if (this.State.Workitem.Object == null)
@@ -272,6 +305,13 @@ namespace SJBot.Topics
             if (this.State.Workitem.Description == null)
             {
                 this.SetActiveTopic(Constants.DESCRIPTION_PROMPT);
+                this.ActiveTopic.OnReceiveActivity(context);
+                return Task.CompletedTask;
+            }
+
+            if (this.State.Workitem.Attachment == null)
+            {
+                this.SetActiveTopic(Constants.ATTACHMENT_PROMPT);
                 this.ActiveTopic.OnReceiveActivity(context);
                 return Task.CompletedTask;
             }
@@ -373,6 +413,30 @@ namespace SJBot.Topics
             {
                 Value = context.Request.AsMessageActivity().Text
             };
+        }
+    }
+
+    public class AttachmentValidator : Validator<Attachment>
+    {
+        public override ValidatorResult<Attachment> Validate(IBotContext context)
+        {
+            if (context.Request.AsMessageActivity().Attachments != null && context.Request.AsMessageActivity().Attachments.Any())
+            {
+                var attachment = context.Request.AsMessageActivity().Attachments.FirstOrDefault();
+
+                return new ValidatorResult<Attachment>
+                {
+
+                    Value = attachment
+                };
+            }
+            else
+            {
+                return new ValidatorResult<Attachment>
+                {
+                    Reason = Constants.ATTACHMENT_ERROR
+                };
+            }
         }
     }
 

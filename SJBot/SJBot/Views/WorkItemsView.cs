@@ -2,13 +2,16 @@
 using Microsoft.Bot.Builder;
 using System.Collections.Generic;
 using Microsoft.Bot.Schema;
+using SJBot.Cards;
+using AdaptiveCards;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace SJBot.Views
 {
     public class WorkItemsView
     {
-        public static void ShowWorkItems(IBotContext context, List<Workitem> workitems, bool lastOnly = false)
+        public static void ShowWorkItems(IBotContext context, List<Workitem> workitems, IHttpContextAccessor accessor, bool lastOnly = false)
         {
             if ((workitems == null) || (workitems.Count == 0))
             {
@@ -25,26 +28,16 @@ namespace SJBot.Views
 
             foreach (var item in workitems)
             {
-                HeroCard heroCard = new HeroCard()
+                var card = new WorkItemCard(item);
+
+                Attachment attachment = new Attachment()
                 {
-                    Title = $"Object: {item.Object} - Customer: {item.Customer}",
-                    Subtitle = $"Date: {item.Date.Value.ToShortDateString()} - Hours: {item.Hours}",
-                    Text = $"Description: {item.Description}",
-
-
-                    //Images = new List<CardImage>()
-                    //{
-                    //    new CardImage() { Url = $"https://placeholdit.imgix.net/~text?txtsize=35&txt={item.Description}&w=500&h=260" }
-                    //}
-
+                    ContentType = AdaptiveCard.ContentType,
+                    Content = card.GetCard(accessor)
                 };
 
-                //TODO
-                //AdaptiveCard
-
-                attachments.Add(heroCard.ToAttachment());
+                attachments.Add(attachment);
             }
-
             var activity = MessageFactory.Carousel(attachments);
             context.Reply(activity);
         }

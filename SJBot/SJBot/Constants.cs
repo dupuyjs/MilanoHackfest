@@ -15,9 +15,13 @@ namespace SJBot
         public const string DATE_PROMPT = "datePrompt";
         public const string HOURS_PROMPT = "hoursPrompt";        
         public const string DESCRIPTION_PROMPT = "descriptionPrompt";
+        public const string ATTACHMENT_PROMPT = "attachmentPrompt";
+
+        
 
         public const string INT_ERROR = "notInt";
         public const string DATE_ERROR = "notDate";
+        public const string ATTACHMENT_ERROR = "errorAttachment";
 
     }
 }

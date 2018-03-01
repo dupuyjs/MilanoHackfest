@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using SJBot.Models;
 using SJBot.Views;
+using Microsoft.AspNetCore.Http;
 
 namespace SJBot.Topics
 {
     public class RootTopic : TopicsRoot
     {
-
+        public IHttpContextAccessor Accessor { get; set; }
 
         public RootTopic(IBotContext context) : base(context)
         {
@@ -37,7 +38,7 @@ namespace SJBot.Topics
 
                         ((List<Workitem>)ctx.State.UserProperties[Constants.USER_STATE_WORKITEMS]).Add(workitem);
 
-                        WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], true);
+                        WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], Accessor, true);
                     })
                     .OnFailure((ctx, reason) =>
                     {
@@ -54,11 +55,15 @@ namespace SJBot.Topics
 
         public override Task OnReceiveActivity(IBotContext context)
         {
-            if ((context.Request.Type == ActivityTypes.Message) && (context.Request.AsMessageActivity().Text.Length > 0))
+            if ((context.Request.Type == ActivityTypes.Message) &&
+                (!string.IsNullOrEmpty(context.Request.AsMessageActivity().Text) || context.Request.AsMessageActivity().Attachments != null))
             {
                 var message = context.Request.AsMessageActivity();
 
                 // If the user wants to change the topic of conversation...
+                if (context.TopIntent != null && context.TopIntent.Score > 0.7)
+                {
+                    
 
                 if (context.TopIntent.Name == "intent.currentuser")
                 {
@@ -81,20 +86,21 @@ namespace SJBot.Topics
                     return Task.CompletedTask;
                 }
 
-                if (context.TopIntent.Name == "intent.workitem.list")
-                {
-                    this.ClearActiveTopic();
+                    if (context.TopIntent.Name == "intent.workitem.list")
+                    {
+                        this.ClearActiveTopic();
 
-                    WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS]);
-                    return Task.CompletedTask;
-                }
+                        WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], Accessor);
+                        return Task.CompletedTask;
+                    }
 
-                if (context.TopIntent.Name == "intent.help")
-                {
-                    this.ClearActiveTopic();
+                    if (context.TopIntent.Name == "intent.help")
+                    {
+                        this.ClearActiveTopic();
 
-                    this.ShowHelp(context);
-                    return Task.CompletedTask;
+                        this.ShowHelp(context);
+                        return Task.CompletedTask;
+                    }
                 }
 
                 if (context.TopIntent.Name == "intent.restart")

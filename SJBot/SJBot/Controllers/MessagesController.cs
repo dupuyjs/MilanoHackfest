@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Adapters;
 using Microsoft.Bot.Schema;
@@ -17,11 +18,12 @@ namespace Microsoft.Bot.Samples
     public class MessagesController : Controller
     {
         BotFrameworkAdapter adapter = null;
+        IHttpContextAccessor httpContextAccessor = null;
 
-        public MessagesController(BotFrameworkAdapter adapter)
+        public MessagesController(BotFrameworkAdapter adapter, IHttpContextAccessor httpContextAccessor)
         {
             this.adapter = adapter;
-           
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public Task OnReceiveActivity(IBotContext context)
@@ -30,7 +32,7 @@ namespace Microsoft.Bot.Samples
             if (context.Request.Type == ActivityTypes.Message)
             {
                 var rootTopic = new RootTopic(context);
-
+                rootTopic.Accessor = httpContextAccessor;
                 rootTopic.OnReceiveActivity(context);
             }
 
