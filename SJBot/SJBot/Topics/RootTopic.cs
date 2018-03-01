@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using SJBot.Models;
 using SJBot.Views;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Bot.Samples;
+using Microsoft.Extensions.Configuration;
 
 namespace SJBot.Topics
 {
@@ -39,6 +41,9 @@ namespace SJBot.Topics
                         ((List<Workitem>)ctx.State.UserProperties[Constants.USER_STATE_WORKITEMS]).Add(workitem);
 
                         WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], Accessor, true);
+
+                        SqlUtils sql = new SqlUtils(Startup.ConnectionString);
+                        sql.CreateNewWorkItem(workitem);
                     })
                     .OnFailure((ctx, reason) =>
                     {
@@ -63,6 +68,19 @@ namespace SJBot.Topics
                 // If the user wants to change the topic of conversation...
                 if (context.TopIntent != null && context.TopIntent.Score > 0.7)
                 {
+                    if (context.TopIntent.Name == "intent.currentuser")
+                    {
+                        if (context.State.UserProperties["owner"] != null)
+                        {
+                            context.Reply($"Current user: {context.State.UserProperties["owner"]}");
+                        }
+                        else
+                        {
+                            context.Reply($"I've not recognized yet. What's your name?");                        
+                        }
+                        return Task.CompletedTask;
+                    }
+
                     if (context.TopIntent.Name == "intent.workitem.add")
                     {
                         // Set the active topic and let the active topic handle this turn.
@@ -75,7 +93,12 @@ namespace SJBot.Topics
                     {
                         this.ClearActiveTopic();
 
-                        WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], Accessor);
+                        SqlUtils sql = new SqlUtils(Startup.ConnectionString);
+                        var owner = context.State.UserProperties["owner"];
+
+                        //WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], Accessor);
+                        WorkItemsView.ShowWorkItems(context, sql.GetWorkItems(owner), Accessor);
+
                         return Task.CompletedTask;
                     }
 
@@ -86,8 +109,17 @@ namespace SJBot.Topics
                         this.ShowHelp(context);
                         return Task.CompletedTask;
                     }
+
+                    if (context.TopIntent.Name == "intent.restart")
+                    {
+                        this.ClearActiveTopic();
+                        context.State.ConversationProperties.Clear();
+                        context.State.UserProperties.Clear();
+                        //return Task.CompletedTask;
+                    }
                 }
 
+               
                 // If there is an active topic, let it handle this turn until it completes.
                 if (HasActiveTopic)
                 {
