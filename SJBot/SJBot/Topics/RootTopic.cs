@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Bot.Samples;
 using Microsoft.Extensions.Configuration;
 using static SJBot.Middleware.AttachmentMiddleware;
+using Microsoft.Bot.Builder.Ai;
 
 namespace SJBot.Topics
 {
@@ -39,6 +40,7 @@ namespace SJBot.Topics
                     {
                         this.ClearActiveTopic();
 
+                        workitem.Attachment = $"{Startup.BlobEndPoint}{Startup.BlobContainerName}/{workitem.Attachment}"; 
                         ((List<Workitem>)ctx.State.UserProperties[Constants.USER_STATE_WORKITEMS]).Add(workitem);
 
                         WorkItemsView.ShowWorkItems(context, context.State.UserProperties[Constants.USER_STATE_WORKITEMS], Accessor, true);
@@ -71,7 +73,7 @@ namespace SJBot.Topics
                 {
                     if(context.TopIntent.Name == "intent.image")
                     {
-                        context.Reply(((VisionEntity)context.TopIntent.Entities[0]).Value);
+                        context.Reply(((LuisEntity)context.TopIntent.Entities[0]).Value);
                     }
 
                     if (context.TopIntent.Name == "intent.currentuser")

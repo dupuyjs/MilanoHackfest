@@ -34,7 +34,7 @@ namespace SJBot
                 cmd.Parameters.Add("@hours", SqlDbType.Int, 80).Value = item.Hours;
                 cmd.Parameters.Add("@descr", SqlDbType.VarChar, 80).Value = item.Description;
                 cmd.Parameters.Add("@owner", SqlDbType.VarChar, 80).Value = item.Owner;
-                cmd.Parameters.Add("@attach", SqlDbType.VarChar, 255).Value = item.Attachment;  //item.Attachment;
+                cmd.Parameters.Add("@attach", SqlDbType.VarChar, 255).Value = item.Attachment; // $"{Startup.BlobEndPoint}{Startup.BlobContainerName}/{item.Attachment}";
                 cmd.CommandType = CommandType.Text;
                 cmd.ExecuteNonQuery();
             }
@@ -66,6 +66,7 @@ namespace SJBot
                         item.Hours = int.Parse(reader["WorkHours"].ToString());
                         item.Description = reader["WorkDescription"].ToString();
                         item.Owner = reader["WorkOwner"].ToString();
+                        item.Attachment = reader["WorkAttachment"].ToString();
 
                         list.Add(item);
                     }

@@ -18,6 +18,7 @@ namespace SJBot
     {
         public static string ConnectionString { get; private set; }
         public static string BlobConnectionString { get; private set; }
+        public static string BlobEndPoint { get; private set; }
         public static string BlobContainerName { get; private set; }
 
 
@@ -31,6 +32,7 @@ namespace SJBot
             Configuration = builder.Build();
             ConnectionString = Configuration.GetSection("ConnectionStrings").GetSection("DefaultConnection").Value;
             BlobConnectionString = Configuration.GetSection("BlobConnection").GetSection("DefaultConnection").Value;
+            BlobEndPoint = Configuration.GetSection("BlobConnection").GetSection("EndPoint").Value;
             BlobContainerName = Configuration.GetSection("BlobConnection").GetSection("ContainerName").Value;
         }
 
