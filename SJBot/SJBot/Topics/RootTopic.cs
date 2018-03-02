@@ -69,7 +69,7 @@ namespace SJBot.Topics
                 // If the user wants to change the topic of conversation...
                 if (context.TopIntent != null && context.TopIntent.Score > 0.7)
                 {
-                    if(context.TopIntent.Name == "intent.image")
+                    if (context.TopIntent.Name == "intent.image")
                     {
                         context.Reply(((VisionEntity)context.TopIntent.Entities[0]).Value);
                     }
@@ -125,7 +125,6 @@ namespace SJBot.Topics
                     }
                 }
 
-               
                 // If there is an active topic, let it handle this turn until it completes.
                 if (HasActiveTopic)
                 {

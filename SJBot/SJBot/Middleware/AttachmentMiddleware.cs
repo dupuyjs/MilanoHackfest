@@ -18,7 +18,6 @@ namespace SJBot.Middleware
     {
         public async Task ReceiveActivity(IBotContext context, MiddlewareSet.NextDelegate next)
         {
-            
             if (HasImageAttachment(context))
             {
                 byte[] imageBuffer = await GetImageFromMessageAsync(context);

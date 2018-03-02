@@ -271,12 +271,6 @@ namespace SJBot.Topics
 
                         this.State.Workitem.Date = DateTime.Parse(time.value);
                     }
-
-                    //// HOURS
-                    //if (item.Type == "number")
-                    //{
-                    //    this.State.Workitem.Customer = item.Value;
-                    //}
                 }
             }
 
