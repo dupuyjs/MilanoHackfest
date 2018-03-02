@@ -59,10 +59,18 @@ namespace SJBot.Cards
             });
 
             // Get Desciption
-            card.Actions.Add(new AdaptiveCards.SubmitAction()
+            //card.Actions.Add(new AdaptiveCards.SubmitAction()
+            firstColumn.Items.Add(new TextBlock()
             {
-                Data = "description",
-                Title = "Get Description"
+                Text = $"Description: {_workitem.Description}",               
+            });
+
+            // Get Attachment
+            card.Actions.Add(new AdaptiveCards.OpenUrlAction()
+            {
+                Url = _workitem.Attachment,
+                Title = "Download Attachment"
+                
             });
 
             return card;

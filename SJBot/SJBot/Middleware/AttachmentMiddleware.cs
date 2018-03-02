@@ -1,4 +1,5 @@
 ﻿using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Ai;
 using Microsoft.Bot.Builder.Middleware;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
@@ -26,7 +27,7 @@ namespace SJBot.Middleware
 
                 Vision result = await MakeAnalysisRequest(imageBuffer, "d44d077e88e24f1ab5dbda8c0794455a");
 
-                var entity = new VisionEntity() {
+                var entity = new LuisEntity() {
                     Value = result.description.captions.FirstOrDefault().text,
                     Type = "Description"
                 };

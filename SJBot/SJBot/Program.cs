@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SJBot;
 
-namespace Microsoft.Bot.Samples
+namespace SJBot
 {
     public class Program
     {
